@@ -75,6 +75,33 @@ This endpoint allows authenticated users to sell gold, which will update the use
 - If the balance is sufficient, the transaction is created, and the wallet is updated with the new Rial balance.
 
 
+### 3. **Transaction History**
+
+This endpoint allows authenticated users to view their transaction history. Admin users can filter by `user_id` to view the history of a specific user.
+
+- **URL**: `/transactions/user/`
+- **Method**: `GET`
+- **Query Parameters**:
+  - `user_id` *(optional, for admin users)*: The ID of the user whose transactions should be retrieved.
+
+- **Response**:
+  - **Success** (`200 OK`):
+    ```json
+    [
+        {
+            "id": "Transaction ID",
+            "type": "Transaction Type",
+            "amount_rial": "Amount in Rial",
+            "gold_weight_gram": "Gold weight in grams",
+            "price_per_gram": "Price per gram of gold",
+            "status": "Transaction Status",
+            "date": "Transaction Date"
+        }
+    ]
+    ```
+
+
+
 
 ## Authentication
 

@@ -5,8 +5,6 @@ from django.db import transaction as db_transaction
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from wallet.models import Wallet
-
 from .constants import GOLD_PRICE_PER_GRAM
 from .models import Transaction
 

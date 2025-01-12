@@ -1,0 +1,109 @@
+{
+	"info": {
+		"_postman_id": "a8ef5a78-38cd-4174-a52f-1927d476f64a",
+		"name": "gold",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "23961450"
+	},
+	"item": [
+		{
+			"name": "Buy",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzM2ODY0NDA3LCJpYXQiOjE3MzY2OTE2MDcsImp0aSI6ImE3MmI0MTMwMDU2MDQxNDk4ZTU1MjA1NTIwMDExZTYzIiwidXNlcl9pZCI6NX0.25WNikx8b5YDlpWjz4O5tKOyQ77kXcjNq8KVUwbk3Io",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"amount_rial\": 5000000\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://127.0.0.1:8000/transactions/buy/"
+			},
+			"response": []
+		},
+		{
+			"name": "sell",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzM2ODY0NDA3LCJpYXQiOjE3MzY2OTE2MDcsImp0aSI6ImE3MmI0MTMwMDU2MDQxNDk4ZTU1MjA1NTIwMDExZTYzIiwidXNlcl9pZCI6NX0.25WNikx8b5YDlpWjz4O5tKOyQ77kXcjNq8KVUwbk3Io",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"gold_weight_gram\": 1\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://127.0.0.1:8000/transactions/sell/"
+			},
+			"response": []
+		},
+		{
+			"name": "user history",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzM2ODY0NDA3LCJpYXQiOjE3MzY2OTE2MDcsImp0aSI6ImE3MmI0MTMwMDU2MDQxNDk4ZTU1MjA1NTIwMDExZTYzIiwidXNlcl9pZCI6NX0.25WNikx8b5YDlpWjz4O5tKOyQ77kXcjNq8KVUwbk3Io",
+						"type": "text"
+					}
+				],
+				"url": "http://127.0.0.1:8000/transactions/user/"
+			},
+			"response": []
+		},
+		{
+			"name": "login",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"moti\",\n    \"password\": \"19941373mf\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://127.0.0.1:8000/auth/jwt/create/"
+			},
+			"response": []
+		},
+		{
+			"name": "create user",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"moti\",\n    \"password\": \"19941373mf\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://127.0.0.1:8000/auth/users/"
+			},
+			"response": []
+		}
+	]
+}

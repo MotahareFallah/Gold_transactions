@@ -1,6 +1,3 @@
-from datetime import datetime
-
-from django.utils.dateparse import parse_datetime
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -23,7 +20,7 @@ class BuyGoldView(APIView):
         )
 
         if serializer.is_valid():
-            transaction = serializer.save()
+            serializer.save()
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
@@ -40,7 +37,7 @@ class SellGoldView(APIView):
         )
 
         if serializer.is_valid():
-            transaction = serializer.save()
+            serializer.save()
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
