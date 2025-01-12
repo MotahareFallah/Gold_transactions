@@ -1,6 +1,7 @@
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model
+from django.db import transaction as db_transaction
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
@@ -57,7 +58,7 @@ class BuyTransactionSerializer(serializers.ModelSerializer):
 
         gold_weight_gram = amount_rial / GOLD_PRICE_PER_GRAM
 
-        with transaction.atomic():
+        with db_transaction.atomic():
             # Update wallet balances
             wallet.balance_rial -= amount_rial
             wallet.balance_gram += gold_weight_gram
@@ -125,14 +126,14 @@ class SellTransactionSerializer(serializers.ModelSerializer):
 
         amount_rial = Decimal(gold_weight_gram) * GOLD_PRICE_PER_GRAM
 
-        with transaction.atomic():
+        with db_transaction.atomic():
             # Deduct the amount from the wallet
             wallet.balance_rial += amount_rial
             wallet.balance_gram -= gold_weight_gram
             wallet.save()
 
             # Create the transaction
-            transaction = Transaction.objects.create(
+            sell_transaction = Transaction.objects.create(
                 user=user,
                 type=Transaction.TransactionType.SELL,
                 gold_weight_gram=gold_weight_gram,
@@ -141,7 +142,7 @@ class SellTransactionSerializer(serializers.ModelSerializer):
                 status=Transaction.TransactionStatus.COMPLETED,
             )
 
-        return transaction
+        return sell_transaction
 
 
 class TransactionHistorySerializer(serializers.ModelSerializer):
