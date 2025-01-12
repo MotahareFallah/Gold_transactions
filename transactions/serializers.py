@@ -33,16 +33,12 @@ class BuyTransactionSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
-        # Get the current authenticated user from the request context
         user = self.context["request"].user
 
-        # Extract the validated amount_rial data
         amount_rial = validated_data["amount_rial"]
 
-        # Calculate gold weight in grams
         gold_weight_gram = amount_rial / GOLD_PRICE_PER_GRAM
 
-        # Create the transaction
         transaction = Transaction.objects.create(
             user=user,
             type=Transaction.TransactionType.BUY,
@@ -72,30 +68,19 @@ class SellTransactionSerializer(serializers.ModelSerializer):
             "amount_rial": {"read_only": True},
         }
 
-    # def validate_gold_weight_grams(self, value):
-    #     if value <= 0:
-    #         raise serializers.ValidationError("Gold weight must be greater than zero.")
-    #     return value
-
-    def validate_gold_weight_gram(self, value):
-        if value is None:
-            raise serializers.ValidationError("Gold weight cannot be null.")
+    def validate_gold_weight_grams(self, value):
         if value <= 0:
             raise serializers.ValidationError("Gold weight must be greater than zero.")
         return value
 
     def create(self, validated_data):
 
-        # Get the current authenticated user from the request context
         user = self.context["request"].user
 
-        # Extract the gold weight from validated data
         gold_weight_gram = validated_data.get("gold_weight_gram")
 
-        # Calculate the price based on the gold weight
         amount_rial = Decimal(gold_weight_gram) * GOLD_PRICE_PER_GRAM
 
-        # Create the transaction record (you may add additional fields or logic if needed)
         transaction = Transaction.objects.create(
             user=user,
             type=Transaction.TransactionType.SELL,
