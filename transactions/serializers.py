@@ -1,11 +1,13 @@
 from decimal import Decimal
-from rest_framework.exceptions import ValidationError
+
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
+
+from wallet.models import Wallet
 
 from .constants import GOLD_PRICE_PER_GRAM
 from .models import Transaction
-from wallet.models import Wallet
 
 User = get_user_model()
 
@@ -32,7 +34,7 @@ class BuyTransactionSerializer(serializers.ModelSerializer):
         if value <= 0:
             raise serializers.ValidationError("Amount must be greater than zero.")
         return value
-    
+
     def validate(self, data):
         """Check if the user has enough balance in their wallet."""
         user = self.context["request"].user
@@ -55,19 +57,22 @@ class BuyTransactionSerializer(serializers.ModelSerializer):
 
         gold_weight_gram = amount_rial / GOLD_PRICE_PER_GRAM
 
-        # Deduct the amount from the wallet
-        wallet.balance_rial -= amount_rial
-        wallet.balance_gram += gold_weight_gram
-        wallet.save()
+        with transaction.atomic():
+            # Update wallet balances
+            wallet.balance_rial -= amount_rial
+            wallet.balance_gram += gold_weight_gram
+            wallet.save()
 
-        transaction = Transaction.objects.create(
-            user=user,
-            type=Transaction.TransactionType.BUY,
-            amount_rial=amount_rial,
-            gold_weight_gram=gold_weight_gram,
-            price_per_gram=GOLD_PRICE_PER_GRAM,
-            status=Transaction.TransactionStatus.COMPLETED,
-        )
+            # Create the transaction
+            transaction = Transaction.objects.create(
+                user=user,
+                type=Transaction.TransactionType.BUY,
+                amount_rial=amount_rial,
+                gold_weight_gram=gold_weight_gram,
+                price_per_gram=GOLD_PRICE_PER_GRAM,
+                status=Transaction.TransactionStatus.COMPLETED,
+            )
+
         return transaction
 
 
@@ -89,27 +94,53 @@ class SellTransactionSerializer(serializers.ModelSerializer):
             "amount_rial": {"read_only": True},
         }
 
-    def validate_gold_weight_grams(self, value):
+    def validate_gold_weight_gram(self, value):
         if value <= 0:
             raise serializers.ValidationError("Gold weight must be greater than zero.")
         return value
 
+    def validate(self, data):
+        """Check that the user has enough gold in their wallet."""
+        user = self.context["request"].user
+        wallet = getattr(user, "wallet", None)
+
+        if wallet is None:
+            raise ValidationError("Wallet does not exist for the user.")
+
+        gold_weight_gram = data["gold_weight_gram"]
+
+        if wallet.balance_gram < gold_weight_gram:
+            raise ValidationError(
+                "Insufficient gold balance in wallet to complete the sale."
+            )
+
+        return data
+
     def create(self, validated_data):
 
         user = self.context["request"].user
+        wallet = user.wallet
 
         gold_weight_gram = validated_data.get("gold_weight_gram")
 
         amount_rial = Decimal(gold_weight_gram) * GOLD_PRICE_PER_GRAM
 
-        transaction = Transaction.objects.create(
-            user=user,
-            type=Transaction.TransactionType.SELL,
-            gold_weight_gram=gold_weight_gram,
-            amount_rial=amount_rial,
-            price_per_gram=GOLD_PRICE_PER_GRAM,
-            status=Transaction.TransactionStatus.COMPLETED,
-        )
+        with transaction.atomic():
+            # Deduct the amount from the wallet
+            wallet.balance_rial += amount_rial
+            wallet.balance_gram -= gold_weight_gram
+            wallet.save()
+
+            # Create the transaction
+            transaction = Transaction.objects.create(
+                user=user,
+                type=Transaction.TransactionType.SELL,
+                gold_weight_gram=gold_weight_gram,
+                amount_rial=amount_rial,
+                price_per_gram=GOLD_PRICE_PER_GRAM,
+                status=Transaction.TransactionStatus.COMPLETED,
+            )
+
         return transaction
 
 
