@@ -1,10 +1,11 @@
 from decimal import Decimal
-
+from rest_framework.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
 from .constants import GOLD_PRICE_PER_GRAM
 from .models import Transaction
+from wallet.models import Wallet
 
 User = get_user_model()
 
@@ -31,13 +32,33 @@ class BuyTransactionSerializer(serializers.ModelSerializer):
         if value <= 0:
             raise serializers.ValidationError("Amount must be greater than zero.")
         return value
+    
+    def validate(self, data):
+        """Check if the user has enough balance in their wallet."""
+        user = self.context["request"].user
+        wallet = getattr(user, "wallet", None)
+
+        if wallet is None:
+            raise ValidationError("Wallet does not exist for the user.")
+
+        amount_rial = data["amount_rial"]
+        if wallet.balance_rial < amount_rial:
+            raise ValidationError("Insufficient wallet balance to make this purchase.")
+
+        return data
 
     def create(self, validated_data):
         user = self.context["request"].user
+        wallet = user.wallet
 
         amount_rial = validated_data["amount_rial"]
 
         gold_weight_gram = amount_rial / GOLD_PRICE_PER_GRAM
+
+        # Deduct the amount from the wallet
+        wallet.balance_rial -= amount_rial
+        wallet.balance_gram += gold_weight_gram
+        wallet.save()
 
         transaction = Transaction.objects.create(
             user=user,

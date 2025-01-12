@@ -9,4 +9,3 @@ class Wallet(models.Model):
 
     def __str__(self):
         return f"Wallet of {self.user.username} - {self.balance_gram} grams / {self.balance_rial} Rial"
-
